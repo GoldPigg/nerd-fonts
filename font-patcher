@@ -967,7 +967,7 @@ class font_patcher:
             0xf0de: {'align': 'c', 'valign': '', 'stretch': 'pa', 'params': {}}
         }
         SYM_ATTR_BRAILLE = {
-            'default': {'align': 'c', 'valign': 'c', 'stretch': 'pa', 'params': {'overlap': -0.05}}
+            'default': {'align': 'c', 'valign': 'c', 'stretch': '', 'params': {}} # don't scale because we generate fonts in the suitable size directly.
         }
         SYM_ATTR_HEAVYBRACKETS = {
             'default': {'align': 'c', 'valign': 'c', 'stretch': '^pa1!', 'params': {'ypadding': 0.3, 'careful': True}}
@@ -1175,7 +1175,7 @@ class font_patcher:
             {'Enabled': self.args.octicons,             'Name': "Octicons",                'Filename': "octicons/octicons.otf",                          'Exact': True,  'SymStart': 0X26A1, 'SymEnd': 0X26A1, 'SrcStart': None,   'ScaleRules': OCTI_SCALE_LIST,  'Attributes': SYM_ATTR_DEFAULT},  # Zap
             {'Enabled': self.args.octicons,             'Name': "Octicons",                'Filename': "octicons/octicons.otf",                          'Exact': False, 'SymStart': 0xF27C, 'SymEnd': 0xF306, 'SrcStart': 0xF4A9, 'ScaleRules': OCTI_SCALE_LIST,  'Attributes': SYM_ATTR_DEFAULT},
             {'Enabled': self.args.codicons,             'Name': "Codicons",                'Filename': "codicons/codicon.ttf",                           'Exact': True,  'SymStart': 0xEA60, 'SymEnd': 0xEC1E, 'SrcStart': None,   'ScaleRules': CODI_SCALE_LIST,  'Attributes': SYM_ATTR_DEFAULT},
-            {'Enabled': self.args.braille,              'Name': "Braille",                 'Filename': "braille-cc0-font/BrailleCc0-DOeDd.ttf",          'Exact': True,  'SymStart': 0x2800, 'SymEnd': 0x28FF, 'SrcStart': None,   'ScaleRules': BRAILLE_SCALE_LIST, 'Attributes': SYM_ATTR_BRAILLE},
+            {'Enabled': self.args.braille,              'Name': "Braille",                 'Font'    : self.get_braille_font,                                'Exact': True,  'SymStart': 0x2800, 'SymEnd': 0x28FF, 'SrcStart': None,   'ScaleRules': BRAILLE_SCALE_LIST, 'Attributes': SYM_ATTR_BRAILLE},
             {'Enabled': self.args.custom,               'Name': "Custom",                  'Filename': self.args.custom,                                 'Exact': True,  'SymStart': 0x0000, 'SymEnd': 0x0000, 'SrcStart': None,   'ScaleRules': None,             'Attributes': CUSTOM_ATTR}
         ]
 
@@ -1873,6 +1873,20 @@ class font_patcher:
                     return (scale, box)
         return None
 
+    def get_braille_font(self):
+        """ Get suitable braille font """
+        sys.path.insert(0, os.path.join(os.path.abspath(os.path.dirname(sys.argv[0])), 'bin', 'scripts', 'braille'))
+        try:
+            from Braille import get_braille_font
+        except ImportError:
+            logger.critical("Braille module missing (bin/scripts/braille/Braille.py)")
+            sys.exit(1)
+        width = self.font_dim["width"]
+        ymax = self.font_dim["ymax"]
+        ymin = self.font_dim["ymin"]
+        descent = self.sourceFont.descent
+        ascent = self.sourceFont.ascent
+        return get_braille_font(self.sourceFont.em, width, ymax, ymin, descent, ascent , 0.6)
 
 def half_gap(gap, top):
     """ Divides integer value into two new integers """

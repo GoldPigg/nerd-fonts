@@ -29,7 +29,6 @@ All files created such as `font-patcher` and any `ph` or `sh` script/source file
 
 | Project                                          | License         |
 | ------------------------------------------------ | ----------------|
-| Braille                                          | CC0 1.0         |
 | Codicons                                         | CC BY 4.0       |
 | Devicons                                         | MIT             |
 | Font Awesome                                     | CC BY 4.0       |
